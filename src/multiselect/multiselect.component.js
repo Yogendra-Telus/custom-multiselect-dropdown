@@ -465,11 +465,26 @@ export class Multiselect extends React.Component {
     }
   }
 
-  toggelOptionList() {
-    this.setState({
-      toggleOptionsList: !this.state.toggleOptionsList,
-      highlightOption: this.props.avoidHighlightFirstOption ? -1 : 0,
-    });
+  toggelOptionList(eventType) {
+    const { singleSelect } = this.props;
+    const { toggleOptionsList } = this.state;
+    if (singleSelect) {
+      this.setState({
+        toggleOptionsList: !this.state.toggleOptionsList,
+        highlightOption: this.props.avoidHighlightFirstOption ? -1 : 0,
+      });
+    } else {
+      if (eventType === "onClickEvent") {
+        this.setState({
+          toggleOptionsList: !toggleOptionsList,
+          highlightOption: this.props.avoidHighlightFirstOption ? -1 : 0,
+        });
+      } else {
+        this.setState({
+          highlightOption: this.props.avoidHighlightFirstOption ? -1 : 0,
+        });
+      }
+    }
   }
 
   renderMultiselectContainer() {
@@ -482,7 +497,6 @@ export class Multiselect extends React.Component {
       hidePlaceholder,
       disable,
     } = this.props;
-    debugger;
     return (
       <div
         className={`${ms.multiSelectContainer} ${
@@ -497,7 +511,7 @@ export class Multiselect extends React.Component {
           }`}
           ref={this.searchWrapper}
           style={style["searchBox"]}
-          onClick={singleSelect ? this.toggelOptionList : () => {}}
+          onClick={() => this.toggelOptionList("onClickEvent")}
         >
           {this.renderSelectedList()}
           <input
@@ -507,8 +521,8 @@ export class Multiselect extends React.Component {
             id={`${id || "search"}_input`}
             onChange={this.onChange}
             value={inputValue}
-            onFocus={this.toggelOptionList}
-            onBlur={() => setTimeout(this.toggelOptionList, 200)}
+            onClick={() => this.toggelOptionList("onClickEvent")}
+            onBlur={() => setTimeout(this.toggelOptionList("onBlurEvent"), 200)}
             placeholder={
               (singleSelect && selectedValues.length) ||
               (hidePlaceholder && selectedValues.length)
