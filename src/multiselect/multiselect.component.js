@@ -1,4 +1,6 @@
 import React from "react";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import ms from "./multiselect.component.css";
 import "../assets/closeicon/css/fontello.css";
 
@@ -115,7 +117,7 @@ export class Multiselect extends React.Component {
   }
 
   listenerCallback() {
-    this.searchBox.current.focus();
+    //this.searchBox.current.focus();
   }
 
   componentWillUnmount() {
@@ -294,7 +296,7 @@ export class Multiselect extends React.Component {
       }
     });
     if (!this.props.closeOnSelect) {
-      this.searchBox.current.focus();
+      //this.searchBox.current.focus();
     }
   }
 
@@ -406,24 +408,66 @@ export class Multiselect extends React.Component {
     ));
   }
 
+  getChipTextWithTooptip(value) {
+    const { isObject = false, displayValue } = this.props;
+    if (isObject) {
+      if (value[displayValue]) {
+        if (value[displayValue].length > 4) {
+          return (
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip id="button-tooltip">
+                  {value[displayValue].substr(0, 4) || ''}
+                </Tooltip>
+              }
+            >
+              <div>{value[displayValue].substr(0, 4) || ''}</div>
+            </OverlayTrigger>
+          );
+        } else {
+          return value[displayValue];
+        }
+      }
+    } else {
+      return (value || '').toString();
+    }
+  }
+
   renderSelectedList() {
-    const { isObject = false, displayValue, style, singleSelect } = this.props;
+    const { style, singleSelect } = this.props;
     const { selectedValues, closeIconType } = this.state;
-    return selectedValues.map((value, index) => (
-      <span
-        className={`chip ${ms.chip} ${singleSelect && ms.singleChip} ${
-          this.isDisablePreSelectedValues(value) && ms.disableSelection
-        }`}
-        key={index}
-        style={style["chips"]}
-      >
-        {!isObject ? (value || "").toString() : value[displayValue]}
-        <i
-          className={`icon_cancel ${ms[closeIconType]} ${ms.closeIcon}`}
-          onClick={() => this.onRemoveSelectedItem(value)}
-        />
-      </span>
-    ));
+    // if (this.state.toggleOptionsList) {
+    //   document.addEventListener("click", this.handleOutsideClick, false);
+    // }
+    return (
+      <div className="chip_parent">
+        {selectedValues.map((value, index) => {
+          if (index < 2) {
+            return (
+              <span
+                className={`chip ${ms.chip} ${singleSelect && ms.singleChip} ${
+                  this.isDisablePreSelectedValues(value) && ms.disableSelection
+                }`}
+                key={index}
+                style={style["chips"]}
+              >
+                {this.getChipTextWithTooptip(value)}
+                <i
+                  className={`icon_cancel ${ms[closeIconType]} ${ms.closeIcon}`}
+                  onClick={() => this.onRemoveSelectedItem(value)}
+                />
+              </span>
+            );
+          }
+        })}
+        {selectedValues.length > 2 && (
+          <span className="chip_more_text">{`+${
+            selectedValues.length - 2
+          } more`}</span>
+        )}
+      </div>
+    );
   }
 
   isDisablePreSelectedValues(value) {
@@ -514,7 +558,7 @@ export class Multiselect extends React.Component {
           onClick={() => this.toggelOptionList("onClickEvent")}
         >
           {this.renderSelectedList()}
-          <input
+          {/* <input
             type="text"
             ref={this.searchBox}
             className="searchBox"
@@ -533,7 +577,7 @@ export class Multiselect extends React.Component {
             style={style["inputField"]}
             autoComplete="off"
             disabled={singleSelect || disable}
-          />
+          /> */}
           {singleSelect && <i className={`icon_cancel ${ms.icon_down_dir}`} />}
         </div>
         <div
